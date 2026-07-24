@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elysian Threads - Premium Clothing Showroom</title>
+    <style>
+        :root {
+            --bg: #faf8f5; --surface: #ffffff; --text: #2c2c2c; --text-light: #6b6b6b;
+            --accent: #c9a96e; --accent-dark: #a8874e; --rose: #e8b4b8; --navy: #1e2a38;
+            --border: #e8e4df; --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow: 0 4px 20px rgba(0,0,0,0.08); --radius: 12px;
+            --font: 'Segoe UI', system-ui, sans-serif; --font-display: 'Georgia', serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text); min-height:100vh; }
+        .header { background: var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; position:sticky; top:0; z-index:100; }
+        .header-inner { max-width:1300px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
+        .brand { font-family: var(--font-display); font-size:1.6rem; font-weight:700; color:var(--navy); letter-spacing:1px; }
+        .brand span { color:var(--accent); }
+        .nav-links { display:flex; align-items:center; gap:1rem; }
+        .nav-btn { padding:0.5rem 1.2rem; border-radius:50px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; font-size:0.85rem; font-weight:500; transition:0.25s; color:var(--text); text-decoration:none; }
+        .nav-btn:hover { border-color:var(--accent); color:var(--accent-dark); background:#fdfaf5; }
+        .hero-banner { background:linear-gradient(135deg, #1e2a38, #2c4055, #3a4f65); border-radius:var(--radius); padding:3rem 2rem; margin:2rem auto; max-width:1300px; color:#fff; text-align:center; }
+        .hero-banner h1 { font-family:var(--font-display); font-size:2.4rem; margin-bottom:0.5rem; }
+        .filters-bar { max-width:1300px; margin:0 auto 1.5rem; display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center; }
+        .filter-chip { padding:0.5rem 1.1rem; border-radius:50px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; font-size:0.85rem; transition:0.25s; }
+        .filter-chip.active, .filter-chip:hover { background:var(--navy); color:#fff; border-color:var(--navy); }
+        .search-input { padding:0.55rem 1.2rem; border-radius:50px; border:1.5px solid var(--border); font-size:0.9rem; outline:none; min-width:200px; }
+        .product-grid { max-width:1300px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:1.5rem; padding-bottom:2rem; }
+        .product-card { background:var(--surface); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); transition:0.25s; cursor:pointer; display:flex; flex-direction:column; }
+        .product-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,0.12); }
+        .product-image { width:100%; height:240px; display:flex; align-items:center; justify-content:center; font-size:5rem; background-size:cover; background-position:center; }
+        .product-image.no-img { background:linear-gradient(135deg, #e8e4df, #d5cfc8); }
+        .product-badge { position:absolute; top:12px; left:12px; background:var(--rose); color:#fff; padding:0.3rem 0.7rem; border-radius:50px; font-size:0.75rem; font-weight:600; z-index:2; }
+        .stock-low { background:#e74c3c !important; }
+        .product-info { padding:1.2rem; flex-grow:1; display:flex; flex-direction:column; gap:0.4rem; }
+        .product-category { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent-dark); font-weight:600; }
+        .product-name { font-weight:600; font-size:1.05rem; color:var(--navy); }
+        .product-meta { font-size:0.82rem; color:var(--text-light); display:flex; gap:0.8rem; flex-wrap:wrap; }
+        .product-price { font-weight:700; font-size:1.2rem; color:var(--navy); margin-top:auto; }
+        .btn { padding:0.55rem 1.2rem; border-radius:50px; border:none; cursor:pointer; font-weight:600; font-size:0.85rem; transition:0.25s; font-family:var(--font); }
+        .btn-reserve { background:var(--navy); color:#fff; flex-grow:1; }
+        .btn-reserve:hover { background:#2c4055; }
+        .btn-details { background:transparent; border:1.5px solid var(--border); color:var(--text); }
+        .btn-details:hover { border-color:var(--navy); color:var(--navy); }
+        .btn-out-of-stock { background:#eee; color:#999; cursor:not-allowed; flex-grow:1; }
+        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:200; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.2s ease; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .modal { background:var(--surface); border-radius:var(--radius); padding:2rem; max-width:500px; width:90%; box-shadow:0 12px 40px rgba(0,0,0,0.12); text-align:center; animation:slideUp 0.3s ease; }
+        @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .modal h2 { font-family:var(--font-display); margin-bottom:0.8rem; color:var(--navy); }
+        .phone-number { font-size:2rem; font-weight:700; color:var(--accent-dark); margin:1rem 0; }
+        .btn-call { display:inline-block; background:#27ae60; color:#fff; padding:0.7rem 2rem; border-radius:50px; text-decoration:none; font-weight:700; font-size:1rem; margin:0.5rem; transition:0.25s; }
+        .btn-call:hover { background:#219a52; transform:scale(1.03); }
+        .btn-close { background:var(--navy); color:#fff; padding:0.6rem 2rem; border-radius:50px; border:none; cursor:pointer; font-weight:600; margin-top:1rem; }
+        .footer { text-align:center; padding:2rem; color:var(--text-light); font-size:0.8rem; }
+        .footer a { color:var(--accent-dark); text-decoration:none; }
+        .empty-state { text-align:center; padding:3rem; color:var(--text-light); }
+        @media (max-width:768px) {
+            .header-inner { flex-wrap:wrap; height:auto; padding:0.8rem 0; }
+            .product-grid { grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">Elysian<span>Threads</span></div>
+            <nav class="nav-links">
+                <span class="nav-btn" id="reservationBadge" style="display:none;">📞 Reserved: <span id="badgeCount">0</span></span>
+            </nav>
+        </div>
+    </header>
+
+    <div class="hero-banner">
+        <h1>Discover Your Style</h1>
+        <p>Reserve your favourite pieces with a single call to <strong>1234567890</strong></p>
+    </div>
+
+    <div class="filters-bar">
+        <button class="filter-chip active" data-category="all">All</button>
+        <button class="filter-chip" data-category="Men">👔 Men</button>
+        <button class="filter-chip" data-category="Women">👗 Women</button>
+        <button class="filter-chip" data-category="Kids">👶 Kids</button>
+        <button class="filter-chip" data-category="Accessories">👜 Accessories</button>
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search clothing...">
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">No items found.</div>
+
+    <div class="modal-overlay" id="reservationModal" style="display:none;">
+        <div class="modal">
+            <span class="reserved-badge-modal">✅ Reserved!</span>
+            <h2>Confirm Your Reservation</h2>
+            <p>Call us to finalise:</p>
+            <div class="phone-number"><a href="tel:1234567890" style="color:inherit;text-decoration:none;">📞 1234567890</a></div>
+            <p id="reservedItemName" style="font-weight:600;"></p>
+            <a href="tel:1234567890" class="btn-call">📞 Call Now</a>
+            <br>
+            <button class="btn-close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 Elysian Threads – <a href="admin.html">Admin Panel</a></p>
+    </div>
+
+    <div id="toastContainer" style="position:fixed;bottom:2rem;right:2rem;z-index:300;"></div>
+
+    <script>
+        const PHONE = '1234567890';
+        const STORAGE_INVENTORY = 'elysian_threads_inventory';
+        const STORAGE_RESERVATIONS = 'elysian_threads_reservations';
+
+        const SEED_INVENTORY = [
+            { id:'1', name:'Classic Wool Suit', category:'Men', price:8999, size:'M, L, XL', color:'Charcoal Grey', stock:8, imageUrl:'' },
+            { id:'2', name:'Linen Casual Shirt', category:'Men', price:2499, size:'S, M, L, XL', color:'Sky Blue', stock:15, imageUrl:'' },
+            { id:'3', name:'Slim Fit Chinos', category:'Men', price:3299, size:'30-38', color:'Khaki', stock:12, imageUrl:'' },
+            { id:'4', name:'Evening Silk Gown', category:'Women', price:12999, size:'S, M, L', color:'Burgundy', stock:5, imageUrl:'' },
+            { id:'5', name:'Floral Maxi Dress', category:'Women', price:4599, size:'XS-L', color:'Rose Pink', stock:10, imageUrl:'' },
+            { id:'6', name:'Designer Blouse', category:'Women', price:1899, size:'S, M, L, XL', color:'Ivory White', stock:20, imageUrl:'' },
+            { id:'7', name:'Kids Denim Jacket', category:'Kids', price:1799, size:'4Y-12Y', color:'Light Wash', stock:14, imageUrl:'' },
+            { id:'8', name:'Cotton T-Shirt Pack', category:'Kids', price:999, size:'2Y-10Y', color:'Assorted', stock:25, imageUrl:'' },
+            { id:'9', name:'Leather Handbag', category:'Accessories', price:5499, size:'One Size', color:'Tan Brown', stock:6, imageUrl:'' },
+            { id:'10', name:'Silk Printed Scarf', category:'Accessories', price:1499, size:'One Size', color:'Multicolor', stock:18, imageUrl:'' }
+        ];
+
+        const CAT_GRADIENTS = {
+            'Men':'linear-gradient(135deg, #2c3e50, #3d566e, #4a6b8a)',
+            'Women':'linear-gradient(135deg, #e8b4b8, #d4959b, #c47a82)',
+            'Kids':'linear-gradient(135deg, #f9ca7f, #f0b44d, #e8a32e)',
+            'Accessories':'linear-gradient(135deg, #8e6bb8, #7b5aa0, #6a4c8c)'
+        };
+        const CAT_EMOJI = { Men:'👔', Women:'👗', Kids:'👶', Accessories:'👜' };
+
+        let inventory = [], reservations = [], currentCategory = 'all';
+
+        function loadData(){
+            inventory = JSON.parse(localStorage.getItem(STORAGE_INVENTORY)) || JSON.parse(JSON.stringify(SEED_INVENTORY));
+            reservations = JSON.parse(localStorage.getItem(STORAGE_RESERVATIONS)) || [];
+            if(!localStorage.getItem(STORAGE_INVENTORY)) localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
+        }
+
+        function saveAll(){
+            localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
+            localStorage.setItem(STORAGE_RESERVATIONS, JSON.stringify(reservations));
+        }
+
+        function showToast(msg){
+            const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+            t.style.cssText='background:#1e2a38;color:#fff;padding:0.8rem 1.5rem;border-radius:50px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.2);animation:slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards;';
+            document.getElementById('toastContainer').appendChild(t);
+            setTimeout(()=>t.remove(),3000);
+        }
+
+        function filterProducts(){
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            return inventory.filter(i=> (currentCategory==='all' || i.category===currentCategory) &&
+                (i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term) || (i.color||'').toLowerCase().includes(term))
+            );
+        }
+
+        function renderGrid(){
+            const filtered = filterProducts();
+            document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
+            document.getElementById('productGrid').innerHTML = filtered.map(item => {
+                const stockLabel = item.stock<=0 ? 'Out of Stock' : (item.stock<=3 ? `Only ${item.stock} left!` : '');
+                const badgeClass = item.stock<=0 ? 'stock-low' : (item.stock<=3 ? 'stock-low' : '');
+                const grad = CAT_GRADIENTS[item.category] || CAT_GRADIENTS['Men'];
+                const emoji = CAT_EMOJI[item.category] || '👕';
+                const imgHtml = item.imageUrl
+                    ? `<img src="${escapeHtml(item.imageUrl)}" alt="" style="width:100%;height:240px;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div class="product-image no-img" style="display:none;background:${grad};">${emoji}</div>`
+                    : `<div class="product-image no-img" style="background:${grad};">${emoji}</div>`;
+                return `
+                <div class="product-card">
+                    ${imgHtml}
+                    ${stockLabel ? `<span class="product-badge ${badgeClass}">${stockLabel}</span>` : ''}
+                    <div class="product-info">
+                        <span class="product-category">${escapeHtml(item.category)}</span>
+                        <span class="product-name">${escapeHtml(item.name)}</span>
+                        <div class="product-meta">
+                            ${item.size ? `<span>📏 ${escapeHtml(item.size)}</span>` : ''}
+                            ${item.color ? `<span>🎨 ${escapeHtml(item.color)}</span>` : ''}
+                        </div>
+                        <span class="product-price">₹${item.price.toLocaleString('en-IN')}</span>
+                        <div style="display:flex; gap:0.5rem; margin-top:0.6rem;">
+                            ${item.stock>0
+                                ? `<button class="btn btn-reserve" onclick="reserveItem('${item.id}')">📞 Reserve</button>`
+                                : `<button class="btn btn-out-of-stock" disabled>Sold Out</button>`
+                            }
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            updateBadge();
+        }
+
+        function reserveItem(id){
+            const item = inventory.find(i=>i.id===id);
+            if(!item || item.stock<=0){ showToast('Out of stock!'); renderGrid(); return; }
+            item.stock--;
+            reservations.push({
+                id:'res_'+Date.now(), itemId:item.id, itemName:item.name, itemCategory:item.category,
+                itemPrice:item.price, timestamp:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})
+            });
+            saveAll();
+            document.getElementById('reservedItemName').textContent = item.name;
+            document.getElementById('reservationModal').style.display='flex';
+            renderGrid();
+        }
+
+        function closeModal(){ document.getElementById('reservationModal').style.display='none'; }
+        function updateBadge(){
+            const badge = document.getElementById('reservationBadge');
+            const count = document.getElementById('badgeCount');
+            if(reservations.length){
+                badge.style.display='inline-block';
+                count.textContent = reservations.length;
+            } else badge.style.display='none';
+        }
+
+        function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+        document.querySelectorAll('.filter-chip').forEach(chip=>{
+            chip.addEventListener('click', function(){
+                document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                renderGrid();
+            });
+        });
+        document.getElementById('searchInput').addEventListener('input', renderGrid);
+        document.getElementById('reservationModal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+        loadData();
+        renderGrid();
+    </script>
+</body>
+</html>

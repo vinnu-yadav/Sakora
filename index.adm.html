@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Elysian Threads</title>
+    <style>
+        :root {
+            --bg: #faf8f5; --surface: #ffffff; --text: #2c2c2c; --text-light: #6b6b6b;
+            --accent: #c9a96e; --navy: #1e2a38; --border: #e8e4df;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08); --radius: 12px;
+            --font: 'Segoe UI', system-ui, sans-serif; --font-display: 'Georgia', serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text); min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+        .container { max-width:1100px; width:100%; padding:2rem; }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+        .brand { font-family:var(--font-display); font-size:1.8rem; color:var(--navy); }
+        .brand span { color:var(--accent); }
+        .login-box, .dashboard { background:var(--surface); border-radius:var(--radius); padding:2rem; box-shadow:var(--shadow); }
+        .login-box { max-width:400px; margin:4rem auto; text-align:center; }
+        .login-box input { width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid var(--border); font-size:1rem; margin:0.8rem 0; }
+        .btn { padding:0.6rem 1.5rem; border-radius:50px; border:none; cursor:pointer; font-weight:600; font-size:0.9rem; transition:0.25s; font-family:var(--font); }
+        .btn-primary { background:var(--navy); color:#fff; }
+        .btn-danger { background:#c0392b; color:#fff; }
+        .btn-success { background:#27ae60; color:#fff; }
+        .btn:hover { opacity:0.9; transform:translateY(-1px); }
+        .form-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+        .form-group { flex:1; min-width:150px; }
+        .form-group label { font-size:0.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; }
+        .form-group input, .form-group select { width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid var(--border); font-size:0.9rem; }
+        table { width:100%; border-collapse:collapse; margin-top:1rem; font-size:0.85rem; }
+        th, td { padding:0.7rem; text-align:left; border-bottom:1px solid var(--border); }
+        th { background:#f9f7f4; font-weight:700; color:var(--navy); }
+        .section-title { font-family:var(--font-display); color:var(--navy); margin:1.5rem 0 0.8rem; border-bottom:2px solid var(--accent); padding-bottom:0.4rem; }
+        .back-link { display:inline-block; margin-bottom:1rem; color:var(--accent-dark); text-decoration:none; }
+        .toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); color:#fff; padding:0.8rem 1.5rem; border-radius:50px; font-weight:600; z-index:300; animation:slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards; }
+        @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes fadeOut { to{opacity:0;transform:translateY(20px)} }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand">Elysian<span>Threads</span> <span style="
