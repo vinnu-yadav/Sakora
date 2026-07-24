@@ -20,26 +20,296 @@
         .login-box, .dashboard { background:var(--surface); border-radius:var(--radius); padding:2rem; box-shadow:var(--shadow); }
         .login-box { max-width:400px; margin:4rem auto; text-align:center; }
         .login-box input { width:100%; padding:0.7rem; border-radius:8px; border:1.5px solid var(--border); font-size:1rem; margin:0.8rem 0; }
-        .btn { padding:0.6rem 1.5rem; border-radius:50px; border:none; cursor:pointer; font-weight:600; font-size:0.9rem; transition:0.25s; font-family:var(--font); }
+        .btn { padding:0.6rem 1.5rem; border-radius:50px; border:none; cursor:pointer; font-weight:600; font-size:0.9rem; transition:0.25s; font-family:var(--font); display:inline-block; }
         .btn-primary { background:var(--navy); color:#fff; }
         .btn-danger { background:#c0392b; color:#fff; }
         .btn-success { background:#27ae60; color:#fff; }
         .btn:hover { opacity:0.9; transform:translateY(-1px); }
         .form-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
         .form-group { flex:1; min-width:150px; }
-        .form-group label { font-size:0.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; }
+        .form-group label { font-size:0.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; display:block; margin-bottom:0.2rem; }
         .form-group input, .form-group select { width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid var(--border); font-size:0.9rem; }
         table { width:100%; border-collapse:collapse; margin-top:1rem; font-size:0.85rem; }
         th, td { padding:0.7rem; text-align:left; border-bottom:1px solid var(--border); }
-        th { background:#f9f7f4; font-weight:700; color:var(--navy); }
-        .section-title { font-family:var(--font-display); color:var(--navy); margin:1.5rem 0 0.8rem; border-bottom:2px solid var(--accent); padding-bottom:0.4rem; }
-        .back-link { display:inline-block; margin-bottom:1rem; color:var(--accent-dark); text-decoration:none; }
-        .toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); color:#fff; padding:0.8rem 1.5rem; border-radius:50px; font-weight:600; z-index:300; animation:slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards; }
+        th { background:#f9f7f4; font-weight:700; color:var(--navy); text-transform:uppercase; font-size:0.75rem; }
+        .section-title { font-family:var(--font-display); color:var(--navy); margin:1.5rem 0 0.8rem; border-bottom:2px solid var(--accent); padding-bottom:0.4rem; display:inline-block; }
+        .back-link { color:var(--accent-dark); text-decoration:none; font-weight:600; }
+        .stock-indicator { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+        .stock-ok { background:#27ae60; } .stock-low-dot { background:#e74c3c; } .stock-out { background:#999; }
+        .toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); color:#fff; padding:0.8rem 1.5rem; border-radius:50px; font-weight:600; z-index:300; box-shadow:0 4px 20px rgba(0,0,0,0.2); animation:slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards; }
         @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
         @keyframes fadeOut { to{opacity:0;transform:translateY(20px)} }
+        .empty-state { text-align:center; padding:2rem; color:var(--text-light); }
+        .btn-sm { padding:0.35rem 0.8rem; font-size:0.8rem; margin-right:0.3rem; }
+        .debug-msg { font-size:0.75rem; color:#999; margin-top:0.5rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="brand">Elysian<span>Threads</span> <span style="
+            <div class="brand">Elysian<span>Threads</span> <span style="font-size:0.9rem;color:var(--text-light);">Admin</span></div>
+            <a href="index.html" class="back-link">← Back to Store</a>
+        </div>
+
+        <!-- Login form -->
+        <div class="login-box" id="loginBox">
+            <h2>🔐 Admin Access</h2>
+            <p style="color:var(--text-light); margin-bottom:1rem;">Enter password to manage inventory</p>
+            <input type="password" id="passwordInput" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+            <br>
+            <button class="btn btn-primary" onclick="login()">Login</button>
+            <p class="debug-msg" id="debugMsg"></p>
+        </div>
+
+        <!-- Dashboard (hidden until login) -->
+        <div class="dashboard" id="dashboard" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="color:var(--navy);">📋 Inventory Management</h2>
+                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Add Item -->
+            <div style="background:var(--surface); padding:1.5rem; border-radius:var(--radius); margin:1.5rem 0; box-shadow:var(--shadow);">
+                <h3 style="margin-bottom:1rem;">➕ Add New Item</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Name *</label><input type="text" id="addName" placeholder="e.g. Silk Evening Gown"></div>
+                    <div class="form-group"><label>Category *</label><select id="addCategory"><option>Men</option><option>Women</option><option>Kids</option><option>Accessories</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Price (₹) *</label><input type="number" id="addPrice" placeholder="2999" min="1"></div>
+                    <div class="form-group"><label>Size</label><input type="text" id="addSize" placeholder="S, M, L"></div>
+                    <div class="form-group"><label>Color</label><input type="text" id="addColor" placeholder="Navy Blue"></div>
+                    <div class="form-group"><label>Stock *</label><input type="number" id="addStock" value="10" min="1"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:2;"><label>Image URL (optional)</label><input type="text" id="addImageUrl" placeholder="https://..."></div>
+                </div>
+                <button class="btn btn-primary" onclick="addItem()">✅ Add to Inventory</button>
+            </div>
+
+            <!-- Inventory Table -->
+            <h3 class="section-title">📦 Current Inventory</h3>
+            <div id="inventoryEmpty" class="empty-state" style="display:none;">Inventory is empty. Add items above.</div>
+            <table id="inventoryTable" style="display:none;">
+                <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Size</th><th>Color</th><th>Stock</th><th>Actions</th></tr></thead>
+                <tbody id="inventoryBody"></tbody>
+            </table>
+
+            <!-- Reservations Log -->
+            <h3 class="section-title">📞 Reservations Log (Call 1234567890)</h3>
+            <div id="reservationsEmpty" class="empty-state" style="display:none;">No reservations yet.</div>
+            <table id="reservationsTable" style="display:none;">
+                <thead><tr><th>#</th><th>Item</th><th>Category</th><th>Price</th><th>Reserved At</th></tr></thead>
+                <tbody id="reservationsBody"></tbody>
+            </table>
+            <button class="btn btn-danger btn-sm" style="margin-top:1rem;" onclick="clearReservations()">🗑️ Clear All Reservations</button>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        (function() {
+            // Show a debug message to confirm script is running
+            const debugEl = document.getElementById('debugMsg');
+            if (debugEl) debugEl.textContent = '✅ Script loaded. Ready.';
+
+            const PASSWORD = 'sakora';
+            const STORAGE_INVENTORY = 'elysian_threads_inventory';
+            const STORAGE_RESERVATIONS = 'elysian_threads_reservations';
+
+            const SEED_INVENTORY = [
+                { id:'1', name:'Classic Wool Suit', category:'Men', price:8999, size:'M, L, XL', color:'Charcoal Grey', stock:8, imageUrl:'' },
+                { id:'2', name:'Linen Casual Shirt', category:'Men', price:2499, size:'S, M, L, XL', color:'Sky Blue', stock:15, imageUrl:'' },
+                { id:'3', name:'Slim Fit Chinos', category:'Men', price:3299, size:'30-38', color:'Khaki', stock:12, imageUrl:'' },
+                { id:'4', name:'Evening Silk Gown', category:'Women', price:12999, size:'S, M, L', color:'Burgundy', stock:5, imageUrl:'' },
+                { id:'5', name:'Floral Maxi Dress', category:'Women', price:4599, size:'XS-L', color:'Rose Pink', stock:10, imageUrl:'' },
+                { id:'6', name:'Designer Blouse', category:'Women', price:1899, size:'S, M, L, XL', color:'Ivory White', stock:20, imageUrl:'' },
+                { id:'7', name:'Kids Denim Jacket', category:'Kids', price:1799, size:'4Y-12Y', color:'Light Wash', stock:14, imageUrl:'' },
+                { id:'8', name:'Cotton T-Shirt Pack', category:'Kids', price:999, size:'2Y-10Y', color:'Assorted', stock:25, imageUrl:'' },
+                { id:'9', name:'Leather Handbag', category:'Accessories', price:5499, size:'One Size', color:'Tan Brown', stock:6, imageUrl:'' },
+                { id:'10', name:'Silk Printed Scarf', category:'Accessories', price:1499, size:'One Size', color:'Multicolor', stock:18, imageUrl:'' }
+            ];
+
+            let inventory = [], reservations = [];
+
+            // Safely load data
+            function loadData() {
+                try {
+                    const storedInv = localStorage.getItem(STORAGE_INVENTORY);
+                    if (storedInv) {
+                        inventory = JSON.parse(storedInv);
+                    } else {
+                        inventory = JSON.parse(JSON.stringify(SEED_INVENTORY));
+                        localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
+                    }
+                    const storedRes = localStorage.getItem(STORAGE_RESERVATIONS);
+                    reservations = storedRes ? JSON.parse(storedRes) : [];
+                    if (debugEl) debugEl.textContent = '✅ Data loaded. ' + inventory.length + ' items.';
+                } catch (e) {
+                    console.error('localStorage error:', e);
+                    if (debugEl) debugEl.textContent = '❌ localStorage not available. Use a web server.';
+                }
+            }
+
+            function saveAll() {
+                localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
+                localStorage.setItem(STORAGE_RESERVATIONS, JSON.stringify(reservations));
+            }
+
+            function showToast(msg) {
+                const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+                document.getElementById('toastContainer').appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            }
+
+            // Make functions global so onclick works
+            window.login = function() {
+                const pass = document.getElementById('passwordInput').value;
+                if (pass === PASSWORD) {
+                    document.getElementById('loginBox').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    showToast('✅ Welcome, Admin');
+                    renderAll();
+                } else {
+                    showToast('❌ Incorrect password');
+                    document.getElementById('passwordInput').value = '';
+                }
+            };
+
+            window.logout = function() {
+                document.getElementById('loginBox').style.display = 'block';
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('passwordInput').value = '';
+                showToast('👋 Logged out');
+            };
+
+            window.addItem = function() {
+                const name = document.getElementById('addName').value.trim();
+                const category = document.getElementById('addCategory').value;
+                const price = parseFloat(document.getElementById('addPrice').value);
+                const size = document.getElementById('addSize').value.trim();
+                const color = document.getElementById('addColor').value.trim();
+                const stock = parseInt(document.getElementById('addStock').value);
+                const imageUrl = document.getElementById('addImageUrl').value.trim();
+
+                if (!name || isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
+                    showToast('⚠️ Fill all required fields (Name, Price, Stock)');
+                    return;
+                }
+                inventory.push({
+                    id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    name, category, price, size, color, stock, imageUrl
+                });
+                saveAll();
+                renderAll();
+                document.getElementById('addName').value = '';
+                document.getElementById('addPrice').value = '';
+                document.getElementById('addSize').value = '';
+                document.getElementById('addColor').value = '';
+                document.getElementById('addStock').value = '10';
+                document.getElementById('addImageUrl').value = '';
+                showToast('✅ Item added');
+            };
+
+            window.deleteItem = function(id) {
+                if (!confirm('Delete this item?')) return;
+                inventory = inventory.filter(i => i.id !== id);
+                saveAll();
+                renderAll();
+                showToast('🗑️ Item deleted');
+            };
+
+            window.restockItem = function(id, qty) {
+                const item = inventory.find(i => i.id === id);
+                if (item) {
+                    item.stock += qty;
+                    saveAll();
+                    renderAll();
+                    showToast('📦 Added ' + qty + ' to "' + item.name + '"');
+                }
+            };
+
+            window.clearReservations = function() {
+                if (!confirm('Clear all reservation records?')) return;
+                reservations = [];
+                saveAll();
+                renderAll();
+                showToast('🗑️ Reservations cleared');
+            };
+
+            function renderAll() {
+                renderInventory();
+                renderReservations();
+            }
+
+            function renderInventory() {
+                const tbody = document.getElementById('inventoryBody');
+                const table = document.getElementById('inventoryTable');
+                const empty = document.getElementById('inventoryEmpty');
+                if (inventory.length === 0) {
+                    table.style.display = 'none';
+                    empty.style.display = 'block';
+                    return;
+                }
+                table.style.display = 'table';
+                empty.style.display = 'none';
+                tbody.innerHTML = inventory.map(item => {
+                    let stockDot = 'stock-ok';
+                    if (item.stock <= 0) stockDot = 'stock-out';
+                    else if (item.stock <= 3) stockDot = 'stock-low-dot';
+                    const imgCell = item.imageUrl
+                        ? `<img src="${escapeHtml(item.imageUrl)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">` +
+                          `<span style="display:none;width:40px;height:40px;border-radius:6px;background:#e8e4df;align-items:center;justify-content:center;">👕</span>`
+                        : `<span style="display:inline-flex;width:40px;height:40px;border-radius:6px;background:#e8e4df;align-items:center;justify-content:center;">👕</span>`;
+                    return `<tr>
+                        <td>${imgCell}</td>
+                        <td><strong>${escapeHtml(item.name)}</strong></td>
+                        <td>${escapeHtml(item.category)}</td>
+                        <td>₹${item.price.toLocaleString('en-IN')}</td>
+                        <td>${escapeHtml(item.size || '-')}</td>
+                        <td>${escapeHtml(item.color || '-')}</td>
+                        <td><span class="stock-indicator ${stockDot}"></span>${item.stock}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="restockItem('${item.id}',5)">+5</button>
+                            <button class="btn btn-success btn-sm" onclick="restockItem('${item.id}',1)">+1</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')">🗑️</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            function renderReservations() {
+                const tbody = document.getElementById('reservationsBody');
+                const table = document.getElementById('reservationsTable');
+                const empty = document.getElementById('reservationsEmpty');
+                if (reservations.length === 0) {
+                    table.style.display = 'none';
+                    empty.style.display = 'block';
+                    return;
+                }
+                table.style.display = 'table';
+                empty.style.display = 'none';
+                tbody.innerHTML = reservations.map((r, i) => `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td><strong>${escapeHtml(r.itemName)}</strong></td>
+                        <td>${escapeHtml(r.itemCategory)}</td>
+                        <td>₹${r.itemPrice.toLocaleString('en-IN')}</td>
+                        <td>${r.timestamp}</td>
+                    </tr>
+                `).join('');
+            }
+
+            function escapeHtml(s) {
+                const d = document.createElement('div');
+                d.textContent = s;
+                return d.innerHTML;
+            }
+
+            // Start everything
+            loadData();
+        })();
+    </script>
+</body>
+    </html>
