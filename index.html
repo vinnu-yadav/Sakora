@@ -402,22 +402,34 @@ document.getElementById('signOutBtn').onclick = async () => {
 auth.onAuthStateChanged(async (user) => {
   if(user){
     currentUser = user;
-    const docSnap = await db.collection("users").doc(user.uid).get();
-    if(!docSnap.exists){
-      currentUserDoc = { uid:user.uid, email:user.email, displayName:user.displayName || user.email.split("@")[0] };
-      await db.collection("users").doc(user.uid).set({
-        ...currentUserDoc, emailLower:user.email.toLowerCase(), online:true,
-        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } else {
-      currentUserDoc = docSnap.data();
-      await db.collection("users").doc(user.uid).update({ online:true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
-    }
+    // Fallback profile in case Firestore is slow/unreachable — never blocks the redirect.
+    currentUserDoc = { uid:user.uid, email:user.email, displayName:user.displayName || user.email.split("@")[0] };
+
     document.getElementById('meName').textContent = currentUserDoc.displayName;
     document.getElementById('meAvatar').textContent = initials(currentUserDoc.displayName);
     document.getElementById('authScreen').style.display = "none";
     document.getElementById('app').classList.add('active');
     listenForIncomingCalls();
+
+    // Best-effort: sync/create the Firestore profile doc. Failures here are logged,
+    // not fatal — the user still reaches the dashboard.
+    try{
+      const docSnap = await db.collection("users").doc(user.uid).get();
+      if(!docSnap.exists){
+        await db.collection("users").doc(user.uid).set({
+          ...currentUserDoc, emailLower:user.email.toLowerCase(), online:true,
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        currentUserDoc = docSnap.data();
+        document.getElementById('meName').textContent = currentUserDoc.displayName;
+        document.getElementById('meAvatar').textContent = initials(currentUserDoc.displayName);
+        await db.collection("users").doc(user.uid).update({ online:true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
+      }
+    }catch(err){
+      console.error("Firestore profile sync failed:", err);
+      showDashboardWarning("Signed in, but couldn't reach the database (" + (err.code || err.message) + "). Contacts and messages may not load until this is fixed — check Firestore is created and rules are published.");
+    }
   } else {
     currentUser = null; currentUserDoc = null;
     document.getElementById('authScreen').style.display = "flex";
@@ -425,6 +437,17 @@ auth.onAuthStateChanged(async (user) => {
     if(unsubIncoming) unsubIncoming();
   }
 });
+
+function showDashboardWarning(msg){
+  let banner = document.getElementById('dashWarning');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'dashWarning';
+    banner.style.cssText = "position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:70; background:#3a2222; border:1px solid #6b3a3a; color:#ffd8d8; padding:10px 16px; border-radius:8px; font-size:12.5px; max-width:80vw;";
+    document.body.appendChild(banner);
+  }
+  banner.textContent = msg;
+}
 
 /* ===================== Contact search ===================== */
 const searchInput = document.getElementById('searchInput');
