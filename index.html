@@ -201,20 +201,12 @@
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="authPassword" placeholder="At least 6 characters" autocomplete="current-password">
-    </div>
-    <div class="field" id="displayNameField" style="display:none;">
-      <label>Display name</label>
-      <input type="text" id="authName" placeholder="How others will see you">
+      <input type="password" id="authPassword" placeholder="Your password" autocomplete="current-password">
     </div>
     <div class="authActions">
       <button class="btn" id="authSubmit">Sign in</button>
     </div>
     <p id="authError"></p>
-    <p class="authSwitch">
-      <span id="switchToSignup">New here? <a>Create an account</a></span>
-      <span id="switchToLogin" style="display:none;">Already have an account? <a>Sign in</a></span>
-    </p>
   </div>
 </div>
 
@@ -335,71 +327,68 @@ function initials(name){
 }
 function chatIdFor(a,b){ return [a,b].sort().join("_"); }
 
-/* ===================== Auth UI ===================== */
-let mode = "login";
+/* ===================== Auth UI (login only) ===================== */
 const authEmail = document.getElementById('authEmail');
 const authPassword = document.getElementById('authPassword');
-const authName = document.getElementById('authName');
 const authError = document.getElementById('authError');
 const authSubmit = document.getElementById('authSubmit');
-const displayNameField = document.getElementById('displayNameField');
-const authTag = document.getElementById('authTag');
 
-document.getElementById('switchToSignup').querySelector('a').onclick = () => {
-  mode = "signup";
-  authSubmit.textContent = "Create account";
-  authTag.textContent = "Create an account to start messaging.";
-  displayNameField.style.display = "block";
-  document.getElementById('switchToSignup').style.display = "none";
-  document.getElementById('switchToLogin').style.display = "inline";
-  authError.textContent = "";
-};
-document.getElementById('switchToLogin').querySelector('a').onclick = () => {
-  mode = "login";
-  authSubmit.textContent = "Sign in";
-  authTag.textContent = "Sign in to send messages and start calls.";
-  displayNameField.style.display = "none";
-  document.getElementById('switchToLogin').style.display = "none";
-  document.getElementById('switchToSignup').style.display = "inline";
-  authError.textContent = "";
-};
+// Surface ANY unexpected script error on the login screen instead of failing silently.
+window.addEventListener('error', (e) => {
+  if(document.getElementById('authScreen').style.display !== "none"){
+    authError.textContent = "Something went wrong loading the app: " + (e.message || "unknown error");
+  }
+});
+window.addEventListener('unhandledrejection', (e) => {
+  if(document.getElementById('authScreen').style.display !== "none"){
+    authError.textContent = "Sign-in failed: " + (e.reason && e.reason.message ? e.reason.message : e.reason);
+  }
+});
 
-authSubmit.onclick = async () => {
+function doLogin(){
   const email = authEmail.value.trim();
   const password = authPassword.value;
   authError.textContent = "";
-  if(!email || !password){ authError.textContent = "Enter an email and password."; return; }
-  authSubmit.disabled = true;
-  try{
-    if(mode === "signup"){
-      const name = authName.value.trim() || email.split("@")[0];
-      const cred = await auth.createUserWithEmailAndPassword(email, password);
-      await cred.user.updateProfile({ displayName: name });
-      await db.collection("users").doc(cred.user.uid).set({
-        uid: cred.user.uid, email, displayName: name,
-        emailLower: email.toLowerCase(),
-        online: true, lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } else {
-      await auth.signInWithEmailAndPassword(email, password);
-    }
-  }catch(e){
-    authError.textContent = friendlyAuthError(e);
-  }finally{
-    authSubmit.disabled = false;
+
+  if(!email || !password){
+    authError.textContent = "Enter both an email and a password.";
+    return;
   }
-};
+
+  authSubmit.disabled = true;
+  authSubmit.textContent = "Signing in…";
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      // onAuthStateChanged below handles moving to the dashboard.
+    })
+    .catch((e) => {
+      console.error("Login failed:", e);
+      authError.textContent = friendlyAuthError(e);
+    })
+    .finally(() => {
+      authSubmit.disabled = false;
+      authSubmit.textContent = "Sign in";
+    });
+}
+
+authSubmit.onclick = doLogin;
+authPassword.addEventListener('keydown', (e) => { if(e.key === "Enter") doLogin(); });
+authEmail.addEventListener('keydown', (e) => { if(e.key === "Enter") doLogin(); });
 
 function friendlyAuthError(e){
   const map = {
-    "auth/email-already-in-use": "That email already has an account — sign in instead.",
     "auth/invalid-email": "That email address doesn't look right.",
-    "auth/weak-password": "Password should be at least 6 characters.",
-    "auth/user-not-found": "No account found for that email.",
+    "auth/user-not-found": "No account found for that email. Add one in Firebase Console → Authentication → Users.",
     "auth/wrong-password": "Incorrect password.",
-    "auth/invalid-credential": "Email or password is incorrect."
+    "auth/invalid-credential": "Email or password is incorrect.",
+    "auth/user-disabled": "This account has been disabled.",
+    "auth/too-many-requests": "Too many attempts — wait a bit and try again.",
+    "auth/network-request-failed": "Network error — check your internet connection.",
+    "auth/api-key-not-valid.-please-pass-a-valid-api-key.": "Firebase API key is invalid — check the config.",
+    "auth/configuration-not-found": "Email/Password sign-in isn't enabled in Firebase Console → Authentication → Sign-in method."
   };
-  return map[e.code] || e.message;
+  return map[e.code] || (e.message || "Sign-in failed for an unknown reason.");
 }
 
 document.getElementById('signOutBtn').onclick = async () => {
