@@ -1,236 +1,790 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elysian Threads - Premium Clothing Showroom</title>
-    <style>
-        :root {
-            --bg: #faf8f5; --surface: #ffffff; --text: #2c2c2c; --text-light: #6b6b6b;
-            --accent: #c9a96e; --accent-dark: #a8874e; --rose: #e8b4b8; --navy: #1e2a38;
-            --border: #e8e4df; --shadow: 0 4px 20px rgba(0,0,0,0.08);
-            --radius: 12px; --font: 'Segoe UI', system-ui, sans-serif;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: var(--font); background: var(--bg); color: var(--text); }
-        .header { background: var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; position:sticky; top:0; z-index:100; }
-        .header-inner { max-width:1300px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
-        .brand { font-family: 'Georgia', serif; font-size:1.6rem; font-weight:700; color:var(--navy); }
-        .brand span { color:var(--accent); }
-        .hero-banner { background:linear-gradient(135deg, #1e2a38, #2c4055, #3a4f65); border-radius:var(--radius); padding:3rem 2rem; margin:2rem auto; max-width:1300px; color:#fff; text-align:center; }
-        .hero-banner h1 { font-family:'Georgia', serif; font-size:2.4rem; margin-bottom:0.5rem; }
-        .filters-bar { max-width:1300px; margin:0 auto 1.5rem; display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center; }
-        .filter-chip { padding:0.5rem 1.1rem; border-radius:50px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; font-size:0.85rem; }
-        .filter-chip.active, .filter-chip:hover { background:var(--navy); color:#fff; border-color:var(--navy); }
-        .search-input { padding:0.55rem 1.2rem; border-radius:50px; border:1.5px solid var(--border); font-size:0.9rem; outline:none; min-width:200px; }
-        .product-grid { max-width:1300px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:1.5rem; padding-bottom:2rem; }
-        .product-card { background:var(--surface); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); transition:0.25s; cursor:pointer; }
-        .product-card:hover { transform:translateY(-4px); }
-        .product-thumb { width:100%; height:240px; background-size:cover; background-position:center; background-color:#e8e4df; display:flex; align-items:center; justify-content:center; font-size:5rem; }
-        .product-info { padding:1.2rem; }
-        .product-category { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent-dark); font-weight:600; }
-        .product-name { font-weight:600; font-size:1.05rem; color:var(--navy); }
-        .product-price { font-weight:700; font-size:1.2rem; color:var(--navy); margin-top:0.5rem; }
-        .product-meta { font-size:0.82rem; color:var(--text-light); display:flex; gap:0.8rem; flex-wrap:wrap; margin:0.4rem 0; }
-        .btn { padding:0.6rem 1.5rem; border-radius:50px; border:none; cursor:pointer; font-weight:600; font-size:0.9rem; }
-        .btn-primary { background:var(--navy); color:#fff; }
-        .btn-primary:hover { background:#2c4055; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wire — Messages &amp; Calls</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E1420;
+    --panel: #141B2A;
+    --panel-2: #1A2333;
+    --border: #26314429;
+    --border-solid: #263144;
+    --text: #E7EAF2;
+    --text-dim: #8791A6;
+    --accent: #4FD1C5;
+    --accent-dim: #2E8B82;
+    --call: #FF6B6B;
+    --call-dim: #C44F4F;
+    --radius: 10px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow:hidden;
+  }
+  h1,h2,h3,.brand,.display{ font-family:'Space Grotesk', system-ui, sans-serif; }
 
-        /* Detail modal */
-        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:200; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.2s; }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        .modal-detail { background:var(--surface); border-radius:var(--radius); max-width:700px; width:95%; max-height:90vh; overflow-y:auto; padding:2rem; animation:slideUp 0.3s; }
-        @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
-        .modal-detail h2 { font-family:'Georgia', serif; color:var(--navy); margin-bottom:1rem; }
-        .image-gallery { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
-        .image-gallery img { width:100%; max-width:200px; height:150px; object-fit:cover; border-radius:8px; }
-        .detail-price { font-size:1.5rem; font-weight:700; color:var(--navy); }
-        .btn-reserve { background:#27ae60; color:#fff; width:100%; padding:0.8rem; font-size:1rem; margin-top:1rem; }
-        .btn-reserve:hover { background:#219a52; }
-        .btn-close { background:var(--navy); color:#fff; margin-top:0.8rem; width:100%; }
-        .reservation-success { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:300; display:flex; align-items:center; justify-content:center; }
-        .footer { text-align:center; padding:2rem; color:var(--text-light); font-size:0.8rem; }
-        .toast { position:fixed; bottom:2rem; right:2rem; background:var(--navy); color:#fff; padding:0.8rem 1.5rem; border-radius:50px; font-weight:600; z-index:400; animation:slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards; }
-        @keyframes fadeOut { to{opacity:0; transform:translateY(20px)} }
-    </style>
+  /* ---------- Auth screen ---------- */
+  #authScreen{
+    height:100%; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 20% 20%, #16324a55, transparent 40%),
+      radial-gradient(circle at 80% 80%, #4fd1c522, transparent 45%),
+      var(--bg);
+  }
+  .authBox{
+    width: 360px; max-width:90vw; background:var(--panel);
+    border:1px solid var(--border-solid); border-radius:14px; padding:36px 32px;
+  }
+  .authBox .brand{ font-size:26px; font-weight:700; letter-spacing:-0.02em; margin:0 0 4px; }
+  .authBox .tag{ color:var(--text-dim); font-size:13px; margin:0 0 28px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px; }
+  .field input{
+    width:100%; padding:11px 12px; background:var(--panel-2); border:1px solid var(--border-solid);
+    border-radius:8px; color:var(--text); font-size:14px; font-family:inherit;
+  }
+  .field input:focus{ outline:none; border-color:var(--accent); }
+  .authActions{ display:flex; gap:10px; margin-top:22px; }
+  button{ font-family:inherit; cursor:pointer; }
+  .btn{
+    border:none; border-radius:8px; padding:11px 16px; font-size:14px; font-weight:600;
+    background:var(--accent); color:#08211E; flex:1; transition:transform .08s ease, opacity .15s;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn.secondary{ background:transparent; color:var(--text); border:1px solid var(--border-solid); }
+  .btn:disabled{ opacity:.5; cursor:default; }
+  #authError{ color:var(--call); font-size:13px; margin-top:12px; min-height:16px; }
+  .authSwitch{ text-align:center; margin-top:18px; font-size:13px; color:var(--text-dim); }
+  .authSwitch a{ color:var(--accent); text-decoration:none; cursor:pointer; }
+
+  /* ---------- App shell ---------- */
+  #app{ display:none; height:100%; }
+  #app.active{ display:flex; }
+
+  #sidebar{
+    width:300px; flex-shrink:0; background:var(--panel); border-right:1px solid var(--border-solid);
+    display:flex; flex-direction:column;
+  }
+  #meRow{
+    display:flex; align-items:center; gap:10px; padding:16px; border-bottom:1px solid var(--border-solid);
+  }
+  .avatar{
+    width:38px; height:38px; border-radius:50%; background:var(--accent-dim);
+    color:#08211E; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
+    flex-shrink:0;
+  }
+  .avatar.small{ width:30px; height:30px; font-size:12px; }
+  #meRow .who{ flex:1; min-width:0; }
+  #meRow .name{ font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #meRow .status{ font-size:11px; color:var(--accent); }
+  #signOutBtn{ background:transparent; border:none; color:var(--text-dim); font-size:12px; }
+  #signOutBtn:hover{ color:var(--text); }
+
+  #contactSearch{ padding:12px 14px; border-bottom:1px solid var(--border-solid); }
+  #contactSearch input{
+    width:100%; padding:9px 12px; background:var(--panel-2); border:1px solid var(--border-solid);
+    border-radius:8px; color:var(--text); font-size:13px;
+  }
+  #contactList{ flex:1; overflow-y:auto; }
+  .contact{
+    display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; border-bottom:1px solid var(--border);
+  }
+  .contact:hover{ background:var(--panel-2); }
+  .contact.active{ background:var(--panel-2); border-left:2px solid var(--accent); }
+  .contact .cname{ font-size:13.5px; font-weight:500; }
+  .contact .cstatus{ font-size:11px; color:var(--text-dim); }
+  .emptyList{ padding:20px 16px; color:var(--text-dim); font-size:13px; line-height:1.5; }
+
+  #main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  #chatHeader{
+    height:64px; flex-shrink:0; display:flex; align-items:center; gap:12px; padding:0 20px;
+    border-bottom:1px solid var(--border-solid); background:var(--panel);
+  }
+  #chatHeader .cname{ font-size:15px; font-weight:600; }
+  #chatHeader .cstatus{ font-size:11.5px; color:var(--text-dim); }
+  .headerSpacer{ flex:1; }
+  .iconBtn{
+    width:38px; height:38px; border-radius:50%; background:var(--panel-2); border:1px solid var(--border-solid);
+    color:var(--text); display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .iconBtn:hover{ background:var(--border-solid); }
+  .iconBtn.call{ color:var(--accent); }
+  .iconBtn.hangup{ background:var(--call); color:#fff; border-color:var(--call); }
+
+  #noChat{ flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:14px; }
+
+  #messages{ flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px; }
+  .msgRow{ display:flex; }
+  .msgRow.mine{ justify-content:flex-end; }
+  .bubble{
+    max-width:62%; padding:9px 13px; border-radius:14px; font-size:14px; line-height:1.45;
+    background:var(--panel-2); border:1px solid var(--border-solid);
+  }
+  .msgRow.mine .bubble{ background:var(--accent-dim); border-color:var(--accent-dim); color:#EAFBF9; }
+  .bubble .time{ display:block; font-size:10px; color:var(--text-dim); margin-top:4px; }
+  .msgRow.mine .bubble .time{ color:#C9EFEA; }
+  .bubble img, .bubble video{ max-width:260px; border-radius:8px; display:block; margin-bottom:4px; }
+  .bubble a.fileLink{ color:inherit; text-decoration:underline; }
+
+  #composer{
+    display:flex; align-items:center; gap:10px; padding:14px 20px; border-top:1px solid var(--border-solid);
+    background:var(--panel);
+  }
+  #composer input[type=text]{
+    flex:1; padding:11px 14px; background:var(--panel-2); border:1px solid var(--border-solid);
+    border-radius:20px; color:var(--text); font-size:14px;
+  }
+  #composer input[type=text]:focus{ outline:none; border-color:var(--accent); }
+  #fileInput{ display:none; }
+  #sendBtn{ background:var(--accent); color:#08211E; border:none; width:40px; height:40px; border-radius:50%; font-size:16px; }
+
+  /* ---------- Call overlay ---------- */
+  #callOverlay{
+    display:none; position:fixed; inset:0; background:#080C14EE; z-index:50;
+    flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  }
+  #callOverlay.active{ display:flex; }
+  #callStatusText{ color:var(--text-dim); font-size:13px; letter-spacing:.02em; }
+  #callPeerName{ font-size:22px; font-weight:600; }
+  .videoStage{ position:relative; width:min(720px, 90vw); aspect-ratio:16/10; background:#000; border-radius:14px; overflow:hidden; display:none; }
+  .videoStage.active{ display:block; }
+  #remoteVideo{ width:100%; height:100%; object-fit:cover; }
+  #localVideo{
+    position:absolute; bottom:14px; right:14px; width:120px; border-radius:8px; border:2px solid #1A2333;
+    transform:scaleX(-1);
+  }
+  .callAvatarBig{
+    width:96px; height:96px; border-radius:50%; background:var(--accent-dim); color:#08211E;
+    display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:700;
+  }
+  .callControls{ display:flex; gap:16px; }
+  .callBtn{
+    width:54px; height:54px; border-radius:50%; border:none; font-size:20px;
+    display:flex; align-items:center; justify-content:center; background:var(--panel-2); color:var(--text);
+  }
+  .callBtn.end{ background:var(--call); color:#fff; }
+  .callBtn.muted{ background:var(--accent); color:#08211E; }
+  #incomingBanner{
+    display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:60;
+    background:var(--panel); border:1px solid var(--border-solid); border-radius:12px; padding:14px 18px;
+    align-items:center; gap:14px; box-shadow:0 10px 30px #00000066;
+  }
+  #incomingBanner.active{ display:flex; }
+  #incomingBanner .txt{ font-size:13.5px; }
+  #incomingBanner .txt b{ display:block; font-size:14.5px; }
+  .miniBtn{ border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; }
+  .miniBtn.accept{ background:var(--accent); color:#08211E; }
+  .miniBtn.decline{ background:var(--call); color:#fff; }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--border-solid); border-radius:4px; }
+</style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-inner">
-            <div class="brand">Elysian<span>Threads</span></div>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="authBox">
+    <p class="brand">Wire</p>
+    <p class="tag" id="authTag">Sign in to send messages and start calls.</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="authPassword" placeholder="At least 6 characters" autocomplete="current-password">
+    </div>
+    <div class="field" id="displayNameField" style="display:none;">
+      <label>Display name</label>
+      <input type="text" id="authName" placeholder="How others will see you">
+    </div>
+    <div class="authActions">
+      <button class="btn" id="authSubmit">Sign in</button>
+    </div>
+    <p id="authError"></p>
+    <p class="authSwitch">
+      <span id="switchToSignup">New here? <a>Create an account</a></span>
+      <span id="switchToLogin" style="display:none;">Already have an account? <a>Sign in</a></span>
+    </p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="sidebar">
+    <div id="meRow">
+      <div class="avatar" id="meAvatar">?</div>
+      <div class="who">
+        <div class="name" id="meName">—</div>
+        <div class="status">Online</div>
+      </div>
+      <button id="signOutBtn">Sign out</button>
+    </div>
+    <div id="contactSearch">
+      <input type="text" id="searchInput" placeholder="Find people by email…">
+    </div>
+    <div id="contactList"><div class="emptyList">Search for a person's email above to start a conversation.</div></div>
+  </div>
+
+  <div id="main">
+    <div id="noChat">Select a conversation, or search for someone by email.</div>
+    <div id="chatArea" style="display:none; flex-direction:column; height:100%;">
+      <div id="chatHeader">
+        <div class="avatar small" id="peerAvatar">?</div>
+        <div>
+          <div class="cname" id="peerName">—</div>
+          <div class="cstatus" id="peerStatus">—</div>
         </div>
-    </header>
-
-    <div class="hero-banner">
-        <h1>Discover Your Style</h1>
-        <p>Tap any item to view details and reserve with a call to <strong>1234567890</strong></p>
+        <div class="headerSpacer"></div>
+        <button class="iconBtn call" id="voiceCallBtn" title="Voice call">📞</button>
+        <button class="iconBtn call" id="videoCallBtn" title="Video call">🎥</button>
+      </div>
+      <div id="messages"></div>
+      <div id="composer">
+        <button class="iconBtn" id="attachBtn" title="Send a file">📎</button>
+        <input type="file" id="fileInput">
+        <input type="text" id="textInput" placeholder="Type a message…">
+        <button id="sendBtn">➤</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div class="filters-bar">
-        <button class="filter-chip active" data-category="all">All</button>
-        <button class="filter-chip" data-category="Men">👔 Men</button>
-        <button class="filter-chip" data-category="Women">👗 Women</button>
-        <button class="filter-chip" data-category="Kids">👶 Kids</button>
-        <button class="filter-chip" data-category="Accessories">👜 Accessories</button>
-        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search clothing...">
-    </div>
+<!-- Incoming call banner -->
+<div id="incomingBanner">
+  <div class="avatar" id="incomingAvatar">?</div>
+  <div class="txt"><b id="incomingName">—</b><span id="incomingType">Incoming call</span></div>
+  <button class="miniBtn accept" id="acceptCallBtn">Accept</button>
+  <button class="miniBtn decline" id="declineCallBtn">Decline</button>
+</div>
 
-    <div class="product-grid" id="productGrid"></div>
-    <div class="empty-state" id="emptyState" style="display:none; text-align:center; padding:2rem;">No items found.</div>
+<!-- Call overlay -->
+<div id="callOverlay">
+  <div class="callAvatarBig" id="callAvatarBig">?</div>
+  <div id="callPeerName">—</div>
+  <div id="callStatusText">Calling…</div>
+  <div class="videoStage" id="videoStage">
+    <video id="remoteVideo" autoplay playsinline></video>
+    <video id="localVideo" autoplay playsinline muted></video>
+  </div>
+  <div class="callControls">
+    <button class="callBtn" id="muteBtn" title="Mute">🎙️</button>
+    <button class="callBtn end" id="endCallBtn" title="End call">☎</button>
+  </div>
+</div>
 
-    <!-- Detail modal -->
-    <div class="modal-overlay" id="detailModal" style="display:none;">
-        <div class="modal-detail" id="detailContent"></div>
-    </div>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
 
-    <!-- Reservation success modal -->
-    <div class="reservation-success" id="reservationSuccess" style="display:none;">
-        <div class="modal-detail" style="text-align:center;">
-            <h2>✅ Reserved!</h2>
-            <p>Call us to finalise your reservation:</p>
-            <div style="font-size:2rem; font-weight:700; color:#c9a96e; margin:1rem 0;">
-                <a href="tel:1234567890" style="color:inherit; text-decoration:none;">📞 1234567890</a>
-            </div>
-            <p id="reservedItemName"></p>
-            <a href="tel:1234567890" class="btn btn-primary" style="display:inline-block; margin:0.5rem;">📞 Call Now</a>
-            <button class="btn btn-close" onclick="document.getElementById('reservationSuccess').style.display='none'">Close</button>
-        </div>
-    </div>
+<script>
+/* ===================== Firebase init ===================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyC20z6dWPD4Fjinc6KKpVDmm9rQUGeKjHU",
+  authDomain: "kartify-a4e66.firebaseapp.com",
+  databaseURL: "https://kartify-a4e66-default-rtdb.firebaseio.com",
+  projectId: "kartify-a4e66",
+  storageBucket: "kartify-a4e66.firebasestorage.app",
+  messagingSenderId: "663778229564",
+  appId: "1:663778229564:web:5271acb085f30893913239",
+  measurementId: "G-GH5JGVJYMP"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-    <div class="footer">© 2025 Elysian Threads</div>
-    <div id="toastContainer"></div>
+/* ===================== State ===================== */
+let currentUser = null;      // firebase auth user
+let currentUserDoc = null;   // {uid,email,displayName}
+let activePeer = null;       // {uid,email,displayName}
+let activeChatId = null;
+let unsubMessages = null;
+let unsubSearch = null;
 
-    <script>
-        const PHONE = '1234567890';
-        const STORAGE_INVENTORY = 'elysian_threads_inventory';
-        const STORAGE_RESERVATIONS = 'elysian_threads_reservations';
+let pc = null;               // RTCPeerConnection
+let localStream = null;
+let currentCallDocRef = null;
+let currentCallRole = null;  // 'caller' | 'callee'
+let currentCallType = null;  // 'audio' | 'video'
+let unsubIncoming = null;
+let unsubCallDoc = null;
+let unsubRemoteCandidates = null;
+let isMuted = false;
 
-        const SEED_INVENTORY = [
-            { id:'1', name:'Classic Wool Suit', category:'Men', price:8999, size:'M,L,XL', color:'Charcoal Grey', stock:8, images:[] },
-            { id:'2', name:'Linen Casual Shirt', category:'Men', price:2499, size:'S,M,L,XL', color:'Sky Blue', stock:15, images:[] },
-            { id:'3', name:'Slim Fit Chinos', category:'Men', price:3299, size:'30-38', color:'Khaki', stock:12, images:[] },
-            { id:'4', name:'Evening Silk Gown', category:'Women', price:12999, size:'S,M,L', color:'Burgundy', stock:5, images:[] },
-            { id:'5', name:'Floral Maxi Dress', category:'Women', price:4599, size:'XS-L', color:'Rose Pink', stock:10, images:[] },
-            { id:'6', name:'Designer Blouse', category:'Women', price:1899, size:'S,M,L,XL', color:'Ivory White', stock:20, images:[] },
-            { id:'7', name:'Kids Denim Jacket', category:'Kids', price:1799, size:'4Y-12Y', color:'Light Wash', stock:14, images:[] },
-            { id:'8', name:'Cotton T-Shirt Pack', category:'Kids', price:999, size:'2Y-10Y', color:'Assorted', stock:25, images:[] },
-            { id:'9', name:'Leather Handbag', category:'Accessories', price:5499, size:'One Size', color:'Tan Brown', stock:6, images:[] },
-            { id:'10', name:'Silk Printed Scarf', category:'Accessories', price:1499, size:'One Size', color:'Multicolor', stock:18, images:[] }
-        ];
+const rtcConfig = {
+  iceServers: [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }
+  ]
+};
 
-        let inventory = [], reservations = [], currentCategory = 'all';
+function initials(name){
+  if(!name) return "?";
+  return name.trim().split(/\s+/).map(p=>p[0]).slice(0,2).join("").toUpperCase();
+}
+function chatIdFor(a,b){ return [a,b].sort().join("_"); }
 
-        function loadData(){
-            inventory = JSON.parse(localStorage.getItem(STORAGE_INVENTORY)) || JSON.parse(JSON.stringify(SEED_INVENTORY));
-            reservations = JSON.parse(localStorage.getItem(STORAGE_RESERVATIONS)) || [];
-            if(!localStorage.getItem(STORAGE_INVENTORY)) localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
+/* ===================== Auth UI ===================== */
+let mode = "login";
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authName = document.getElementById('authName');
+const authError = document.getElementById('authError');
+const authSubmit = document.getElementById('authSubmit');
+const displayNameField = document.getElementById('displayNameField');
+const authTag = document.getElementById('authTag');
+
+document.getElementById('switchToSignup').querySelector('a').onclick = () => {
+  mode = "signup";
+  authSubmit.textContent = "Create account";
+  authTag.textContent = "Create an account to start messaging.";
+  displayNameField.style.display = "block";
+  document.getElementById('switchToSignup').style.display = "none";
+  document.getElementById('switchToLogin').style.display = "inline";
+  authError.textContent = "";
+};
+document.getElementById('switchToLogin').querySelector('a').onclick = () => {
+  mode = "login";
+  authSubmit.textContent = "Sign in";
+  authTag.textContent = "Sign in to send messages and start calls.";
+  displayNameField.style.display = "none";
+  document.getElementById('switchToLogin').style.display = "none";
+  document.getElementById('switchToSignup').style.display = "inline";
+  authError.textContent = "";
+};
+
+authSubmit.onclick = async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  authError.textContent = "";
+  if(!email || !password){ authError.textContent = "Enter an email and password."; return; }
+  authSubmit.disabled = true;
+  try{
+    if(mode === "signup"){
+      const name = authName.value.trim() || email.split("@")[0];
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: name });
+      await db.collection("users").doc(cred.user.uid).set({
+        uid: cred.user.uid, email, displayName: name,
+        emailLower: email.toLowerCase(),
+        online: true, lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+    }
+  }catch(e){
+    authError.textContent = friendlyAuthError(e);
+  }finally{
+    authSubmit.disabled = false;
+  }
+};
+
+function friendlyAuthError(e){
+  const map = {
+    "auth/email-already-in-use": "That email already has an account — sign in instead.",
+    "auth/invalid-email": "That email address doesn't look right.",
+    "auth/weak-password": "Password should be at least 6 characters.",
+    "auth/user-not-found": "No account found for that email.",
+    "auth/wrong-password": "Incorrect password.",
+    "auth/invalid-credential": "Email or password is incorrect."
+  };
+  return map[e.code] || e.message;
+}
+
+document.getElementById('signOutBtn').onclick = async () => {
+  if(currentUser){
+    await db.collection("users").doc(currentUser.uid).update({ online:false, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+  }
+  await auth.signOut();
+};
+
+/* ===================== Auth state ===================== */
+auth.onAuthStateChanged(async (user) => {
+  if(user){
+    currentUser = user;
+    const docSnap = await db.collection("users").doc(user.uid).get();
+    if(!docSnap.exists){
+      currentUserDoc = { uid:user.uid, email:user.email, displayName:user.displayName || user.email.split("@")[0] };
+      await db.collection("users").doc(user.uid).set({
+        ...currentUserDoc, emailLower:user.email.toLowerCase(), online:true,
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      currentUserDoc = docSnap.data();
+      await db.collection("users").doc(user.uid).update({ online:true, lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    document.getElementById('meName').textContent = currentUserDoc.displayName;
+    document.getElementById('meAvatar').textContent = initials(currentUserDoc.displayName);
+    document.getElementById('authScreen').style.display = "none";
+    document.getElementById('app').classList.add('active');
+    listenForIncomingCalls();
+  } else {
+    currentUser = null; currentUserDoc = null;
+    document.getElementById('authScreen').style.display = "flex";
+    document.getElementById('app').classList.remove('active');
+    if(unsubIncoming) unsubIncoming();
+  }
+});
+
+/* ===================== Contact search ===================== */
+const searchInput = document.getElementById('searchInput');
+const contactList = document.getElementById('contactList');
+let searchTimer = null;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(runSearch, 300);
+});
+async function runSearch(){
+  const term = searchInput.value.trim().toLowerCase();
+  if(!term){
+    contactList.innerHTML = '<div class="emptyList">Search for a person\'s email above to start a conversation.</div>';
+    return;
+  }
+  const snap = await db.collection("users")
+    .orderBy("emailLower")
+    .startAt(term).endAt(term + "\uf8ff")
+    .limit(15).get();
+  contactList.innerHTML = "";
+  let found = false;
+  snap.forEach(doc => {
+    const u = doc.data();
+    if(u.uid === currentUser.uid) return;
+    found = true;
+    const row = document.createElement('div');
+    row.className = "contact";
+    row.innerHTML = `<div class="avatar small">${initials(u.displayName)}</div>
+      <div><div class="cname">${escapeHtml(u.displayName)}</div><div class="cstatus">${escapeHtml(u.email)}</div></div>`;
+    row.onclick = () => openChat(u);
+    contactList.appendChild(row);
+  });
+  if(!found) contactList.innerHTML = '<div class="emptyList">No one found with that email.</div>';
+}
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s || ""; return d.innerHTML;
+}
+
+/* ===================== Chat ===================== */
+function openChat(peer){
+  activePeer = peer;
+  activeChatId = chatIdFor(currentUser.uid, peer.uid);
+  document.getElementById('noChat').style.display = "none";
+  document.getElementById('chatArea').style.display = "flex";
+  document.getElementById('peerName').textContent = peer.displayName;
+  document.getElementById('peerAvatar').textContent = initials(peer.displayName);
+  document.getElementById('peerStatus').textContent = peer.email;
+  document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
+
+  if(unsubMessages) unsubMessages();
+  const msgsEl = document.getElementById('messages');
+  msgsEl.innerHTML = "";
+  unsubMessages = db.collection("chats").doc(activeChatId).collection("messages")
+    .orderBy("timestamp", "asc")
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(change => {
+        if(change.type === "added"){
+          renderMessage(change.doc.data());
         }
+      });
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    });
+}
 
-        function saveAll(){
-            localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
-            localStorage.setItem(STORAGE_RESERVATIONS, JSON.stringify(reservations));
+function renderMessage(m){
+  const msgsEl = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = "msgRow" + (m.senderId === currentUser.uid ? " mine" : "");
+  const bubble = document.createElement('div');
+  bubble.className = "bubble";
+  let inner = "";
+  if(m.mediaUrl){
+    if(m.mediaType && m.mediaType.startsWith("image/")){
+      inner += `<img src="${m.mediaUrl}" alt="attachment">`;
+    } else if(m.mediaType && m.mediaType.startsWith("video/")){
+      inner += `<video src="${m.mediaUrl}" controls></video>`;
+    } else {
+      inner += `<a class="fileLink" href="${m.mediaUrl}" target="_blank">📎 ${escapeHtml(m.fileName || "Download file")}</a>`;
+    }
+  }
+  if(m.text) inner += `<div>${escapeHtml(m.text)}</div>`;
+  const t = m.timestamp && m.timestamp.toDate ? m.timestamp.toDate() : new Date();
+  inner += `<span class="time">${t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
+  bubble.innerHTML = inner;
+  row.appendChild(bubble);
+  msgsEl.appendChild(row);
+}
+
+document.getElementById('sendBtn').onclick = sendText;
+document.getElementById('textInput').addEventListener('keydown', e => {
+  if(e.key === "Enter") sendText();
+});
+async function sendText(){
+  const input = document.getElementById('textInput');
+  const text = input.value.trim();
+  if(!text || !activeChatId) return;
+  input.value = "";
+  await db.collection("chats").doc(activeChatId).collection("messages").add({
+    senderId: currentUser.uid, text, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  await db.collection("chats").doc(activeChatId).set({
+    participants:[currentUser.uid, activePeer.uid], lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge:true });
+}
+
+document.getElementById('attachBtn').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if(!file || !activeChatId) return;
+  if(file.size > 25 * 1024 * 1024){ alert("Please choose a file under 25MB."); return; }
+  const path = `chatMedia/${activeChatId}/${Date.now()}_${file.name}`;
+  const ref = storage.ref(path);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  await db.collection("chats").doc(activeChatId).collection("messages").add({
+    senderId: currentUser.uid, mediaUrl: url, mediaType: file.type, fileName: file.name,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  await db.collection("chats").doc(activeChatId).set({
+    participants:[currentUser.uid, activePeer.uid], lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge:true });
+});
+
+/* ===================== WebRTC Calling =====================
+   Signaling model (Firestore):
+   calls/{calleeUid} = { from, fromName, fromEmail, chatId, type, offer, status }
+     status: ringing -> accepted -> ended
+   calls/{calleeUid}/callerCandidates/*
+   calls/{calleeUid}/calleeCandidates/*
+*/
+document.getElementById('voiceCallBtn').onclick = () => startCall('audio');
+document.getElementById('videoCallBtn').onclick = () => startCall('video');
+
+async function startCall(type){
+  if(!activePeer) return;
+  currentCallType = type;
+  currentCallRole = 'caller';
+  currentCallDocRef = db.collection("calls").doc(activePeer.uid);
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio:true, video: type === 'video'
+    });
+  }catch(e){
+    alert("Couldn't access your microphone/camera: " + e.message);
+    return;
+  }
+
+  showCallOverlay(activePeer, type, "Calling…");
+
+  pc = new RTCPeerConnection(rtcConfig);
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  wireRemoteStream();
+
+  pc.onicecandidate = (e) => {
+    if(e.candidate) currentCallDocRef.collection("callerCandidates").add(e.candidate.toJSON());
+  };
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await currentCallDocRef.set({
+    from: currentUser.uid, fromName: currentUserDoc.displayName, fromEmail: currentUserDoc.email,
+    chatId: activeChatId, type, status: "ringing",
+    offer: { type: offer.type, sdp: offer.sdp }
+  });
+
+  unsubCallDoc = currentCallDocRef.onSnapshot(async (snap) => {
+    const data = snap.data();
+    if(!data) return;
+    if(data.status === "accepted" && data.answer && pc.currentRemoteDescription == null){
+      await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+      document.getElementById('callStatusText').textContent = "Connected";
+    }
+    if(data.status === "ended"){
+      cleanupCall(false);
+    }
+    if(data.status === "declined"){
+      document.getElementById('callStatusText').textContent = "Call declined";
+      setTimeout(() => cleanupCall(false), 1200);
+    }
+  });
+
+  unsubRemoteCandidates = currentCallDocRef.collection("calleeCandidates")
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(change => {
+        if(change.type === "added" && pc){
+          pc.addIceCandidate(new RTCIceCandidate(change.doc.data())).catch(()=>{});
         }
+      });
+    });
+}
 
-        function showToast(msg){
-            const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
-            document.getElementById('toastContainer').appendChild(t);
-            setTimeout(()=>t.remove(),3000);
+function listenForIncomingCalls(){
+  if(unsubIncoming) unsubIncoming();
+  unsubIncoming = db.collection("calls").doc(currentUser.uid).onSnapshot(snap => {
+    const data = snap.data();
+    if(!data) { hideIncomingBanner(); return; }
+    if(data.status === "ringing"){
+      showIncomingBanner(data);
+    } else if(data.status === "ended" || data.status === "declined"){
+      hideIncomingBanner();
+    }
+  });
+}
+
+let pendingIncoming = null;
+function showIncomingBanner(data){
+  pendingIncoming = data;
+  document.getElementById('incomingAvatar').textContent = initials(data.fromName);
+  document.getElementById('incomingName').textContent = data.fromName;
+  document.getElementById('incomingType').textContent = (data.type === 'video' ? 'Incoming video call' : 'Incoming voice call');
+  document.getElementById('incomingBanner').classList.add('active');
+}
+function hideIncomingBanner(){
+  pendingIncoming = null;
+  document.getElementById('incomingBanner').classList.remove('active');
+}
+
+document.getElementById('declineCallBtn').onclick = async () => {
+  if(!pendingIncoming) return;
+  await db.collection("calls").doc(currentUser.uid).update({ status: "declined" });
+  hideIncomingBanner();
+};
+
+document.getElementById('acceptCallBtn').onclick = async () => {
+  if(!pendingIncoming) return;
+  const data = pendingIncoming;
+  hideIncomingBanner();
+  currentCallRole = 'callee';
+  currentCallType = data.type;
+  currentCallDocRef = db.collection("calls").doc(currentUser.uid);
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio:true, video: data.type === 'video'
+    });
+  }catch(e){
+    alert("Couldn't access your microphone/camera: " + e.message);
+    await currentCallDocRef.update({ status: "declined" });
+    return;
+  }
+
+  showCallOverlay({ displayName: data.fromName }, data.type, "Connecting…");
+
+  pc = new RTCPeerConnection(rtcConfig);
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  wireRemoteStream();
+
+  pc.onicecandidate = (e) => {
+    if(e.candidate) currentCallDocRef.collection("calleeCandidates").add(e.candidate.toJSON());
+  };
+
+  await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  await currentCallDocRef.update({
+    status: "accepted",
+    answer: { type: answer.type, sdp: answer.sdp }
+  });
+  document.getElementById('callStatusText').textContent = "Connected";
+
+  unsubCallDoc = currentCallDocRef.onSnapshot(snap => {
+    const d = snap.data();
+    if(!d) return;
+    if(d.status === "ended") cleanupCall(false);
+  });
+
+  unsubRemoteCandidates = currentCallDocRef.collection("callerCandidates")
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(change => {
+        if(change.type === "added" && pc){
+          pc.addIceCandidate(new RTCIceCandidate(change.doc.data())).catch(()=>{});
         }
+      });
+    });
+};
 
-        function filterProducts(){
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            return inventory.filter(i=> (currentCategory==='all' || i.category===currentCategory) &&
-                (i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term) || (i.color||'').toLowerCase().includes(term))
-            );
-        }
+function wireRemoteStream(){
+  const remoteStream = new MediaStream();
+  document.getElementById('remoteVideo').srcObject = remoteStream;
+  document.getElementById('localVideo').srcObject = localStream;
+  pc.ontrack = (event) => {
+    event.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
+  };
+}
 
-        function renderGrid(){
-            const filtered = filterProducts();
-            document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
-            document.getElementById('productGrid').innerHTML = filtered.map(item => {
-                const firstImg = (item.images && item.images.length>0) ? item.images[0] : '';
-                const thumbStyle = firstImg ? `background-image:url(${firstImg})` : '';
-                const emoji = { Men:'👔', Women:'👗', Kids:'👶', Accessories:'👜' }[item.category] || '👕';
-                return `
-                <div class="product-card" onclick="openDetail('${item.id}')">
-                    <div class="product-thumb" style="${thumbStyle}">
-                        ${!firstImg ? emoji : ''}
-                    </div>
-                    <div class="product-info">
-                        <span class="product-category">${escapeHtml(item.category)}</span>
-                        <span class="product-name">${escapeHtml(item.name)}</span>
-                        <div class="product-meta">
-                            ${item.size ? `<span>📏 ${escapeHtml(item.size)}</span>` : ''}
-                            ${item.color ? `<span>🎨 ${escapeHtml(item.color)}</span>` : ''}
-                        </div>
-                        <span class="product-price">₹${item.price.toLocaleString('en-IN')}</span>
-                    </div>
-                </div>`;
-            }).join('');
-        }
+function showCallOverlay(peer, type, statusText){
+  document.getElementById('callOverlay').classList.add('active');
+  document.getElementById('callPeerName').textContent = peer.displayName;
+  document.getElementById('callAvatarBig').textContent = initials(peer.displayName);
+  document.getElementById('callStatusText').textContent = statusText;
+  const stage = document.getElementById('videoStage');
+  if(type === 'video'){
+    stage.classList.add('active');
+    document.getElementById('callAvatarBig').style.display = 'none';
+  } else {
+    stage.classList.remove('active');
+    document.getElementById('callAvatarBig').style.display = 'flex';
+  }
+  isMuted = false;
+  document.getElementById('muteBtn').classList.remove('muted');
+}
 
-        function openDetail(id){
-            const item = inventory.find(i=>i.id===id);
-            if(!item) return;
-            const content = document.getElementById('detailContent');
-            const imagesHtml = (item.images && item.images.length>0)
-                ? item.images.map(img => `<img src="${img}" alt="">`).join('')
-                : `<div style="width:100%; height:200px; background:#e8e4df; display:flex; align-items:center; justify-content:center; font-size:4rem;">👕</div>`;
-            content.innerHTML = `
-                <h2>${escapeHtml(item.name)}</h2>
-                <div class="image-gallery">${imagesHtml}</div>
-                <p class="product-category">${escapeHtml(item.category)}</p>
-                <p class="detail-price">₹${item.price.toLocaleString('en-IN')}</p>
-                <div style="display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; color:#6b6b6b;">
-                    ${item.size ? `<span>📏 Size: <strong>${escapeHtml(item.size)}</strong></span>` : ''}
-                    ${item.color ? `<span>🎨 Color: <strong>${escapeHtml(item.color)}</strong></span>` : ''}
-                    <span>📦 Stock: <strong>${item.stock}</strong></span>
-                </div>
-                ${item.stock > 0
-                    ? `<button class="btn btn-reserve" onclick="reserveFromDetail('${item.id}')">📞 Reserve</button>`
-                    : `<button class="btn btn-primary" disabled style="width:100%; opacity:0.5;">Sold Out</button>`
-                }
-                <button class="btn btn-close" onclick="closeDetail()">Close</button>
-            `;
-            document.getElementById('detailModal').style.display = 'flex';
-        }
+document.getElementById('endCallBtn').onclick = () => cleanupCall(true);
 
-        function closeDetail(){
-            document.getElementById('detailModal').style.display = 'none';
-        }
+async function cleanupCall(notifyRemote){
+  if(notifyRemote && currentCallDocRef){
+    await currentCallDocRef.update({ status: "ended" }).catch(()=>{});
+  }
+  if(pc){ pc.close(); pc = null; }
+  if(localStream){ localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  if(unsubCallDoc) { unsubCallDoc(); unsubCallDoc = null; }
+  if(unsubRemoteCandidates) { unsubRemoteCandidates(); unsubRemoteCandidates = null; }
+  document.getElementById('callOverlay').classList.remove('active');
+  document.getElementById('remoteVideo').srcObject = null;
+  document.getElementById('localVideo').srcObject = null;
 
-        function reserveFromDetail(id){
-            const item = inventory.find(i=>i.id===id);
-            if(!item || item.stock<=0){ showToast('Out of stock!'); closeDetail(); return; }
-            item.stock--;
-            reservations.push({
-                id:'res_'+Date.now(), itemId:item.id, itemName:item.name, itemCategory:item.category,
-                itemPrice:item.price, timestamp:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})
-            });
-            saveAll();
-            document.getElementById('reservedItemName').textContent = item.name;
-            document.getElementById('reservationSuccess').style.display = 'flex';
-            closeDetail();
-            renderGrid();
-        }
+  // Clean up candidate subcollections + doc after a short delay (best-effort)
+  if(currentCallDocRef){
+    const ref = currentCallDocRef;
+    setTimeout(async () => {
+      try{
+        const cc = await ref.collection("callerCandidates").get();
+        cc.forEach(d => d.ref.delete());
+        const ce = await ref.collection("calleeCandidates").get();
+        ce.forEach(d => d.ref.delete());
+        await ref.delete();
+      }catch(err){}
+    }, 1500);
+  }
+  currentCallDocRef = null;
+  currentCallRole = null;
+}
 
-        function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+document.getElementById('muteBtn').onclick = () => {
+  if(!localStream) return;
+  isMuted = !isMuted;
+  localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+  document.getElementById('muteBtn').classList.toggle('muted', isMuted);
+};
 
-        // Filters
-        document.querySelectorAll('.filter-chip').forEach(chip=>{
-            chip.addEventListener('click', function(){
-                document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-                this.classList.add('active');
-                currentCategory = this.dataset.category;
-                renderGrid();
-            });
-        });
-        document.getElementById('searchInput').addEventListener('input', renderGrid);
-        document.getElementById('detailModal').addEventListener('click', function(e){ if(e.target===this) closeDetail(); });
-        document.addEventListener('keydown', e=>{ if(e.key==='Escape') { closeDetail(); document.getElementById('reservationSuccess').style.display='none'; } });
-
-        loadData();
-        renderGrid();
-    </script>
+window.addEventListener('beforeunload', () => {
+  if(currentUser){
+    db.collection("users").doc(currentUser.uid).update({ online:false }).catch(()=>{});
+  }
+});
+</script>
 </body>
 </html>
